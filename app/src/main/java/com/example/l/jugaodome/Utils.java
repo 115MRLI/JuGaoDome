@@ -1,11 +1,14 @@
 package com.example.l.jugaodome;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.provider.Settings;
+import android.support.annotation.RequiresApi;
 import android.telephony.TelephonyManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -104,6 +107,7 @@ public class Utils {
      * @param context
      * @return
      */
+    @RequiresApi(api = Build.VERSION_CODES.CUPCAKE)
     public static String getUserAgent(Context context) {
         WebView webview;
         webview = new WebView(context);
@@ -248,5 +252,54 @@ public class Utils {
             }
         }
         return false;
+    }
+    /**
+     * 获取手机IMEI
+     *
+     * @param context
+     * @return
+     */
+    public static final String getIMEI(Context context) {
+        try {
+            //实例化TelephonyManager对象
+            TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            //获取IMEI号
+            @SuppressLint("MissingPermission") String imei = telephonyManager.getDeviceId();
+            //在次做个验证，也不是什么时候都能获取到的啊
+            if (imei == null) {
+                imei = "";
+            }
+            return imei;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+
+    }
+
+    /**
+     * 获取手机IMSI
+     */
+    public static String getIMSI(Context context){
+        try {
+            TelephonyManager telephonyManager=(TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+            //获取IMSI号
+            @SuppressLint("MissingPermission") String imsi=telephonyManager.getSubscriberId();
+            if(null==imsi){
+                imsi="";
+            }
+            return imsi;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    /**
+     *获取Android ID
+     **/
+    public static String getAndroidId (Context context) {
+        String ANDROID_ID = Settings.System.getString(context.getContentResolver(), Settings.System.ANDROID_ID);
+        return ANDROID_ID;
     }
 }
