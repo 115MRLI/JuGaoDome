@@ -36,7 +36,6 @@ public class Utils {
      * @return
      */
     public static String getIP(Context context) {
-
         try {
             for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
                 NetworkInterface intf = en.nextElement();
