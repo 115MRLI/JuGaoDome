@@ -1,36 +1,55 @@
 package com.example.l.jugaodome;
 
-
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.view.LayoutInflater;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.example.l.jugaodome.base.BaseActivity;
+import com.example.l.jugaodome.base.BaseFragment;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
 
-public class Main2Activity extends BaseActivity implements AbsListView.OnScrollListener {
+public class FragmentOne extends BaseFragment implements AbsListView.OnScrollListener  {
     @BindView(R.id.main_srl)
     SwipeRefreshLayout swipeRefreshLayout;
     @BindView(R.id.main_lv)
     ListView lv;
     private ArrayAdapter adapter;
     private List<String> list;
-
     @Override
     protected int getLayout() {
-        return R.layout.activity_main2;
+        return R.layout.fragment_layout;
     }
 
+    @Override
+    protected void initView(LayoutInflater inflater) {
+        super.initView(inflater);
+    }
+
+    @Override
+    protected void initEvent() {
+        super.initEvent();
+        list = new ArrayList<>();
+//        list.addAll(Arrays.asList("Java", "php", "C++", "C#", "IOS", "html", "C", "J2ee", "j2se", "VB", ".net", "Http", "tcp", "udp", "www"));
+
+        adapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, android.R.id.text1, list);
+        lv.setAdapter(adapter);
+
+        swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light, android.R.color.holo_orange_light, android.R.color.holo_red_light);
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                new LoadDataThread().start();
+            }
+        });
+    }
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -45,31 +64,6 @@ public class Main2Activity extends BaseActivity implements AbsListView.OnScrollL
             }
         }
     };
-
-    @Override
-    protected void initView() {
-
-    }
-
-    @Override
-    protected void initEvent() {
-        super.initEvent();
-        list = new ArrayList<>();
-        list.addAll(Arrays.asList("Java", "php", "C++", "C#", "IOS", "html", "C", "J2ee", "j2se", "VB", ".net", "Http", "tcp", "udp", "www"));
-
-        adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, android.R.id.text1, list);
-        lv.setAdapter(adapter);
-
-        swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light, android.R.color.holo_orange_light, android.R.color.holo_red_light);
-
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                new LoadDataThread().start();
-            }
-        });
-    }
-
     private int visibleLastIndex;//用来可显示的最后一条数据的索引
 
     @Override
@@ -101,16 +95,7 @@ public class Main2Activity extends BaseActivity implements AbsListView.OnScrollL
         }
 
         private void initData() {
-            list.addAll(Arrays.asList("Json", "XML", "UDP", "http"));
+//            list.addAll(Arrays.asList("Json", "XML", "UDP", "http"));
         }
-    }
-    /**
-     * 跳转到本页面
-     *
-     * @param activity
-     */
-    public static void jumpHere(Activity activity) {
-        activity.startActivity(new Intent(activity, Main2Activity.class));
-
     }
 }
