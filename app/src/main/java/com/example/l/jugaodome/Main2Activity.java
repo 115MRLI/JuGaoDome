@@ -3,48 +3,37 @@ package com.example.l.jugaodome;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Message;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.graphics.Color;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import com.example.l.jugaodome.base.BaseActivity;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import butterknife.BindView;
 
-public class Main2Activity extends BaseActivity implements AbsListView.OnScrollListener {
-    @BindView(R.id.main_srl)
-    SwipeRefreshLayout swipeRefreshLayout;
-    @BindView(R.id.main_lv)
-    ListView lv;
-    private ArrayAdapter adapter;
-    private List<String> list;
+
+public class Main2Activity extends BaseActivity {
+    @BindView(R.id.search_frame)
+    FrameLayout searchFrame;
+
+    @BindView(R.id.btn1)
+    LinearLayout btn1;
+
+    @BindView(R.id.btn2)
+    LinearLayout btn2;
+
+    @BindView(R.id.view1)
+    View view1;
+
+    @BindView(R.id.view2)
+    View view2;
 
     @Override
     protected int getLayout() {
         return R.layout.activity_main2;
     }
 
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case 0x101:
-                    if (swipeRefreshLayout.isRefreshing()) {
-                        adapter.notifyDataSetChanged();
-                        swipeRefreshLayout.setRefreshing(false);//设置不刷新
-                    }
-                    break;
-            }
-        }
-    };
 
     @Override
     protected void initView() {
@@ -54,56 +43,24 @@ public class Main2Activity extends BaseActivity implements AbsListView.OnScrollL
     @Override
     protected void initEvent() {
         super.initEvent();
-        list = new ArrayList<>();
-        list.addAll(Arrays.asList("Java", "php", "C++", "C#", "IOS", "html", "C", "J2ee", "j2se", "VB", ".net", "Http", "tcp", "udp", "www"));
-
-        adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, android.R.id.text1, list);
-        lv.setAdapter(adapter);
-
-        swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light, android.R.color.holo_orange_light, android.R.color.holo_red_light);
-
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        btn1.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onRefresh() {
-                new LoadDataThread().start();
+            public void onClick(View v) {
+                view1.setBackgroundColor(Color.parseColor("#FF4081"));
+                view2.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                getSupportFragmentManager().beginTransaction().replace(R.id.search_frame,new FragmentOne()).commit();
+            }
+        });
+        btn2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                view2.setBackgroundColor(Color.parseColor("#FF4081"));
+                view1.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                getSupportFragmentManager().beginTransaction().replace(R.id.search_frame,new FragmentOne()).commit();
             }
         });
     }
 
-    private int visibleLastIndex;//用来可显示的最后一条数据的索引
-
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        if (adapter.getCount() == visibleLastIndex && scrollState == SCROLL_STATE_IDLE) {
-            new LoadDataThread().start();
-        }
-    }
-
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        visibleLastIndex = firstVisibleItem + visibleItemCount - 1;//减去最后一个加载中那条
-    }
-
-
-    /**
-     * 模拟加载数据的线程
-     */
-    class LoadDataThread extends Thread {
-        @Override
-        public void run() {
-            initData();
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            handler.sendEmptyMessage(0x101);//通过handler发送一个更新数据的标记
-        }
-
-        private void initData() {
-            list.addAll(Arrays.asList("Json", "XML", "UDP", "http"));
-        }
-    }
     /**
      * 跳转到本页面
      *
@@ -111,6 +68,5 @@ public class Main2Activity extends BaseActivity implements AbsListView.OnScrollL
      */
     public static void jumpHere(Activity activity) {
         activity.startActivity(new Intent(activity, Main2Activity.class));
-
     }
 }
