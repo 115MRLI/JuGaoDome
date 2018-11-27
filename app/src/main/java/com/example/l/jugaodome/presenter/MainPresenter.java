@@ -19,4 +19,10 @@ public interface MainPresenter<T extends BaseView> extends BasePresenter<T> {
      * @param ph      设备物理屏幕高度  例如：1280
      */
     void requestAdvertisement(String pkgname, String appname, String ua, String appv, String ip, String brand, String model, String uuid, int pw, int ph);
+
+    /**
+     * 是否停止请求
+     * @param isStar
+     */
+    void stopOrStart(boolean isStar);
 }
