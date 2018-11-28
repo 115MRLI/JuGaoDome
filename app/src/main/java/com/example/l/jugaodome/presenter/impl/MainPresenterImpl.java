@@ -33,12 +33,50 @@ public class MainPresenterImpl<T extends MainView> implements MainPresenter<T> {
 
                 @Override
                 public void onResponse(Call<ResponseData> call, Response<ResponseData> response) {
-                    Log.e("Response", response.toString());
+                    if (response.code() == 200) {
+                        //响应码
+                        //200：有广告 204：无广告
+                        Log.e("Response", response.toString());
+                        Log.e("Response", response.body().toString());
+                        if (Integer.parseInt(response.body().getReturncode())==200) {
+                            Log.e("Response*************", response.toString());
+                            if (Integer.parseInt(response.body().getAdnum()) > 0) {
+                                ResponseData.AdsBean adsBean = response.body().getAds().get(0);
+                                if (adsBean.getAdct() == 4) {
+                                    if (baseView != null) {
+                                        baseView.getShowText(adsBean.getAdm(), false);
+                                    }
+                                } else {
+                                    if (baseView != null) {
+                                        baseView.getShowText(adsBean.getImgurl(), true);
+                                    }
+                                }
+                            }
+                            if (baseView != null) {
+                                baseView.addResNumber(1);
+                                baseView.addSuccessNumber(1);
+                            }
+
+                        } else {
+                            Log.e("Response------------", response.toString());
+                            if (baseView != null) {
+                                baseView.addResNumber(1);
+                            }
+                        }
+
+                    } else {
+                        if (baseView != null) {
+                            baseView.addResNumber(1);
+                        }
+                    }
+
                 }
 
                 @Override
                 public void onFailure(Call<ResponseData> call, Throwable t) {
-
+                    if (baseView != null) {
+                        baseView.addResNumber(1);
+                    }
                 }
             });
 

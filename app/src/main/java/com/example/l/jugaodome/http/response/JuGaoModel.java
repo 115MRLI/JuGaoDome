@@ -19,6 +19,8 @@ public class JuGaoModel {
         JuGaoApi = ServiceGenerator.createServiceFrom(JuGaoApi.class);
     }
     //1dfc8b82ccde162e   banner的测试id
+//    翻译官横幅id：05f71ea09994eca6
+
 
     /**
      * 请求广告位 接口
@@ -38,7 +40,7 @@ public class JuGaoModel {
      */
     public <T> void requestAdvertisement(String pkgname, String appname, String ua, String appv, String ip, String brand, String model, String uuid, int pw, int ph, Callback<T> callback) {
 
-        Call<T> call = (Call<T>) JuGaoApi.requestAdvertisement("1dfc8b82ccde162e", "1", 640, 100, pkgname, appname, ua, 0, Utils.getSDK(), appv, 1, 4, ip, brand, model, uuid, pw, ph);
+        Call<T> call = (Call<T>) JuGaoApi.requestAdvertisement("05f71ea09994eca6", "1", 640, 100, pkgname, appname, ua, 0, Utils.getSDK(), appv, 1, 4, ip, brand, model, uuid, pw, ph);
         call.enqueue(callback);
     }
 }

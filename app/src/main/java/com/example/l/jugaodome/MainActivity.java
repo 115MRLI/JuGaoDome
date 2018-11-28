@@ -1,14 +1,26 @@
 package com.example.l.jugaodome;
 
 
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
+import com.example.l.jugaodome.app.App;
 import com.example.l.jugaodome.base.BaseActivity;
+import com.example.l.jugaodome.popupwindow.CommonPopupWindow;
 import com.example.l.jugaodome.presenter.MainPresenter;
 import com.example.l.jugaodome.presenter.impl.MainPresenterImpl;
 
@@ -18,7 +30,7 @@ import java.util.List;
 
 import butterknife.BindView;
 
-public class MainActivity extends BaseActivity implements MainView {
+public class MainActivity extends BaseActivity implements MainView, CommonPopupWindow.ViewInterface {
     //展示的ip地址
     @BindView(R.id.ip_address)
     TextView ipAddress;
@@ -55,6 +67,8 @@ public class MainActivity extends BaseActivity implements MainView {
     //弹出广告展示时间
     @BindView(R.id.show_time)
     EditText showTime;
+    @BindView(R.id.top)
+    LinearLayout top;
 
     //获取到的ipd地址
     private String ipadressstr = "";
@@ -64,6 +78,13 @@ public class MainActivity extends BaseActivity implements MainView {
     private boolean isStart = true;
     //要请求的app包名加名字集合
     private List<AppPack> appPacks = new ArrayList<>();
+
+    //请求总次数与成功次数
+    private int resNumber = 0, successNum = 0;
+    //广告展示
+    private CommonPopupWindow popupWindow;
+    //展示内容
+    private String contexturl;
 
     @Override
     protected int getLayout() {
@@ -92,7 +113,7 @@ public class MainActivity extends BaseActivity implements MainView {
         super.initEvent();
         ipadressstr = Utils.getIP(this);
         ipAddress.setText(ipadressstr);
-        number.setText("4");
+        number.setText("40");
         onceNumber.setText("20");
         onceTime.setText("30");
         ipNumber.setText("10");
@@ -143,7 +164,7 @@ public class MainActivity extends BaseActivity implements MainView {
                                 super.run();
                                 try {
 
-                                    Thread.sleep(3000);
+                                    Thread.sleep(5000);
                                     presenter.requestAdvertisement(appPacks.get(finalJ).getAppPack(), Utils.changeURLEncoding(appPacks.get(finalJ).getAppName()), finalUa, "1.1.0", ipadressstr, " MI 8 SE", "Xiaomi", Utils.getIMEI(MainActivity.this), 720, 1280);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
@@ -157,7 +178,83 @@ public class MainActivity extends BaseActivity implements MainView {
                 }
             }
         });
+    }
 
+    @Override
+    public void getShowText(String context, boolean isPic) {
+        contexturl = context;
+        if (isPic == true) {
+            showPic(top);
+        } else {
+            showWeb(top);
+        }
+    }
 
+    @Override
+    public void addResNumber(int number) {
+        resNumber = resNumber + number;
+        all.setText(resNumber + "");
+    }
+
+    @Override
+    public void addSuccessNumber(int number) {
+        successNum = successNum + number;
+        successNumber.setText(successNum + "");
+    }
+
+    //向下弹出
+    public void showPic(View view) {
+        if (popupWindow != null && popupWindow.isShowing()) return;
+        popupWindow = new CommonPopupWindow.Builder(this).setView(R.layout.pic_layout).setWidthAndHeight(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).setAnimationStyle(R.style.AnimDown).setViewOnclickListener(this).setOutsideTouchable(true).create();
+        popupWindow.showAsDropDown(view);
+    }
+
+    //向下弹出
+    public void showWeb(View view) {
+        if (popupWindow != null && popupWindow.isShowing()) return;
+        popupWindow = new CommonPopupWindow.Builder(this).setView(R.layout.web_layout).setWidthAndHeight(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).setAnimationStyle(R.style.AnimDown).setViewOnclickListener(this).setOutsideTouchable(true).create();
+        popupWindow.showAsDropDown(view);
+    }
+
+    @Override
+    public void getChildView(View view, int layoutResId) {
+        switch (layoutResId) {
+            case R.layout.pic_layout:
+                ImageView pic = view.findViewById(R.id.show_context);
+                RequestOptions requestOptions = new RequestOptions();
+                requestOptions.error(R.mipmap.jugao);//异常时候显示的图片
+                requestOptions.placeholder(R.mipmap.jugao);//加载成功前显示的图片
+                requestOptions.fallback(R.mipmap.jugao); //url为空的时候,显示的图片
+                requestOptions.diskCacheStrategy(DiskCacheStrategy.NONE); //不缓存
+                Glide.with(App.mContext).load(contexturl).apply(requestOptions).into(pic);
+                view.findViewById(R.id.close).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        popupWindow.dismiss();
+                    }
+                });
+                break;
+            case R.layout.web_layout:
+                WebView webView = view.findViewById(R.id.show_context);
+                WebSettings settings = webView.getSettings();
+                settings.setJavaScriptEnabled(true);
+                settings.setDomStorageEnabled(true);
+                settings.setUseWideViewPort(true);
+                settings.setLoadWithOverviewMode(true);
+                webView.setWebViewClient(new WebViewClient());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
+                } else {
+                    settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+                }
+                webView.loadData(contexturl, "text/html;charset=utf-8", "utf-8");
+                view.findViewById(R.id.close).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        popupWindow.dismiss();
+                    }
+                });
+                break;
+        }
     }
 }
